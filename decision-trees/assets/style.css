@@ -1,0 +1,12 @@
+.dtree-container{max-width:760px;margin:0 auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+.dtree-title{margin:0 0 .25rem 0}
+.dtree-form{border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.dtree-field{margin-top:12px}
+.dtree-label{display:block;font-weight:600;margin-bottom:6px}
+.dtree-input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
+.dtree-button{margin-top:16px;background:#111827;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-size:16px;cursor:pointer}
+.dtree-result{margin-top:12px;border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#f8fafc}
+.dtree-badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;margin-bottom:8px}
+.dtree-ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.dtree-no{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.dtree-restrict{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
