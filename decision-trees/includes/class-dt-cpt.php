@@ -5,23 +5,23 @@ class DT_CPT {
 
   public static function register() {
     register_post_type('decision_tool', [
-      'label'       => __('Decision Tools', 'decision-trees'),
-      'public'      => false,
-      'show_ui'     => true,
-      'show_in_menu'=> true,
-      'show_in_rest'=> false, // keep REST off for this CPT
-      'menu_icon'   => DT_PLUGIN_URL . 'assets/icon.svg',
-      'supports'    => ['title'],
-      'map_meta_cap'=> true,
-      'capabilities'=> [
-        'edit_post'          => 'manage_options',
-        'read_post'          => 'manage_options',
-        'delete_post'        => 'manage_options',
-        'edit_posts'         => 'manage_options',
-        'edit_others_posts'  => 'manage_options',
-        'publish_posts'      => 'manage_options',
-        'read_private_posts' => 'manage_options',
+      'labels' => [
+        'name'          => __('Decision Tools', 'decision-trees'),
+        'singular_name' => __('Decision Tool', 'decision-trees'),
+        'add_new_item'  => __('Add New Decision Tool', 'decision-trees'),
+        'edit_item'     => __('Edit Decision Tool', 'decision-trees'),
+        'menu_name'     => __('Decision Tools', 'decision-trees'),
       ],
+      'public'       => false,
+      'show_ui'      => true,
+      'show_in_menu' => true,
+      'show_in_rest' => false,
+      'menu_icon'    => 'dashicons-networking',   // built-in icon
+      'supports'     => ['title'],
+  
+      // IMPORTANT: remove custom caps for now
+      'capability_type' => 'post',   // uses edit_posts, edit_post, etc.
+      'map_meta_cap'    => true,
     ]);
   }
 

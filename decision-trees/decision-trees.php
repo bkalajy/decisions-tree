@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Decision Trees (Scalable Tools)
+ * Plugin Name: Decision Trees
  * Description: Create multiple decision tools from JSON and render via shortcode [decision_tool slug="..."].
- * Version: 1.0.0
- * Author: Picology
+ * Version: 1.1.3
+ * Author: Baraa Kalajy
  * Text Domain: decision-trees
  */
 
