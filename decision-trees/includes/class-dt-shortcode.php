@@ -24,6 +24,7 @@ class DT_Shortcode {
     $container_id = 'dtree-'.wp_generate_uuid4();
 
     // Enqueue assets
+    wp_enqueue_style('dtree-fonts','https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap',[],null);
     wp_enqueue_style('dtree-style', DT_PLUGIN_URL.'assets/style.css', [], DT_PLUGIN_VERSION);
     wp_enqueue_script('dtree-js', DT_PLUGIN_URL.'assets/decision-tool.js', [], DT_PLUGIN_VERSION, true);
 
