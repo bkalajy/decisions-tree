@@ -137,35 +137,8 @@
         resultBox.style.display = 'block';
         text.textContent = message || '';
   
-        // Use global statuses from options (object keyed by status key)
-        var statusMap = (instance.options && instance.options.statuses) ? instance.options.statuses : {};
-
-        var meta = statusMap[statusKey] || null;
-        var fallbackLabel =
-          (cfg.statusLabels && cfg.statusLabels[statusKey]) ||
-          (statusKey === 'ok' ? 'Recommended' :
-            statusKey === 'no' ? 'Not recommended' :
-              'Recommended with restriction');
-
-        // after computing `meta` and `fallbackLabel`:
-        badge.textContent = meta && meta.label ? meta.label : fallbackLabel;
-
-        // reset styles
-        badge.className = 'dtree-badge';
-        badge.style.color = '';
-        badge.style.backgroundColor = '';
-        badge.style.borderColor = '';
-
-        if (meta) {
-          if (meta.text) badge.style.color = String(meta.text);
-          if (meta.bg) badge.style.backgroundColor = String(meta.bg);
-          if (meta.border) badge.style.borderColor = String(meta.border);
-        } else {
-          // legacy fallback only
-          if (statusKey === 'ok') badge.classList.add('dtree-ok');
-          else if (statusKey === 'no') badge.classList.add('dtree-no');
-          else if (statusKey === 'restrict') badge.classList.add('dtree-restrict');
-        }
+        // Delegate styling + label resolution (per-tree overrides > global > legacy)
+        applyStatus(badge, statusKey, instance);
       }
   
       btn.addEventListener('click', function(){
@@ -182,6 +155,33 @@
         show(String(match.status), String(match.message || ''));
       });
     }
+
+  // assets/decision-tool.js — where you style the result badge
+  function applyStatus(el, statusKey, instance) {
+    const map = (instance.options && instance.options.statuses_map) || {};
+    const styles = (instance.config && instance.config.statusStyles) || {};
+    const labels = (instance.config && instance.config.statusLabels) || {};
+
+    const meta = map[statusKey] || styles[statusKey] || null;
+    const label = (map[statusKey]?.label) || labels[statusKey] || statusKey;
+
+    // clear legacy classes
+    el.classList.remove('dtree-ok', 'dtree-no', 'dtree-restrict');
+
+    if (meta) {
+      el.style.color = meta.text || '';
+      el.style.backgroundColor = meta.bg || '';
+      el.style.borderColor = meta.border || '';
+      el.textContent = label;
+      return;
+    }
+
+    // legacy fallback
+    if (statusKey === 'ok') el.classList.add('dtree-ok');
+    else if (statusKey === 'no') el.classList.add('dtree-no');
+    else if (statusKey === 'restrict') el.classList.add('dtree-restrict');
+    el.textContent = label;
+  }
   
     document.addEventListener('DOMContentLoaded', function(){
       if (!window.DTREE_INSTANCES) return;
