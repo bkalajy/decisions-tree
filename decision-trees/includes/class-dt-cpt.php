@@ -78,35 +78,49 @@ class DT_CPT {
     echo '</div>';
   }
 
-  public static function save_metabox($post_id) {
+  public static function save_metabox( $post_id ) {
+    // Run only for our CPT and skip autosaves/revisions.
+    if ( get_post_type($post_id) !== 'decision_tool' ) return;
+    if ( wp_is_post_autosave($post_id) || wp_is_post_revision($post_id) ) return;
+  
     // Save JSON config
-    if (isset($_POST['dt_config_nonce']) && wp_verify_nonce($_POST['dt_config_nonce'], 'dt_config_save')) {
-      if (!(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) && current_user_can('edit_post', $post_id)) {
+    if ( isset($_POST['dt_config_nonce']) && wp_verify_nonce($_POST['dt_config_nonce'], 'dt_config_save') ) {
+      if ( !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) && current_user_can('edit_post', $post_id) ) {
         $raw = isset($_POST['dt_config']) ? wp_unslash($_POST['dt_config']) : '';
         $decoded = json_decode($raw, true);
-        if ($raw === '') {
+  
+        if ( $raw === '' ) {
           delete_post_meta($post_id, '_dt_config');
-        } else if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-          // Light validation
-          $ok = isset($decoded['fields'], $decoded['rules']) && is_array($decoded['fields']) && is_array($decoded['rules']);
-          if ($ok) {
-            update_post_meta($post_id, '_dt_config', wp_json_encode($decoded, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
-          }
+        } elseif ( json_last_error() === JSON_ERROR_NONE && is_array($decoded)
+                   && isset($decoded['fields'], $decoded['rules'])
+                   && is_array($decoded['fields']) && is_array($decoded['rules']) ) {
+          update_post_meta(
+            $post_id,
+            '_dt_config',
+            wp_json_encode($decoded, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT)
+          );
         }
       }
     }
-
-    // v1.1: Save slug (post_name)
-    if (isset($_POST['dt_meta_nonce']) && wp_verify_nonce($_POST['dt_meta_nonce'], 'dt_meta_save')) {
-      if (!(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) && current_user_can('edit_post', $post_id)) {
-        if (isset($_POST['dt_slug'])) {
-          $new = sanitize_title(wp_unslash($_POST['dt_slug']));
-          if ($new) {
-            // Update post_name; keep post_status etc.
-            wp_update_post([
-              'ID' => $post_id,
-              'post_name' => $new,
-            ]);
+  
+    // Save slug (post_name) — avoid infinite recursion
+    if ( isset($_POST['dt_meta_nonce']) && wp_verify_nonce($_POST['dt_meta_nonce'], 'dt_meta_save') ) {
+      if ( !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) && current_user_can('edit_post', $post_id) ) {
+        if ( isset($_POST['dt_slug']) ) {
+          $new = sanitize_title( wp_unslash($_POST['dt_slug']) );
+          if ( $new ) {
+            $current = get_post($post_id);
+            $current_slug = $current ? $current->post_name : '';
+  
+            if ( $new !== $current_slug ) {
+              // Temporarily unhook to prevent re-entry
+              remove_action('save_post', ['DT_CPT','save_metabox']);
+              wp_update_post([
+                'ID'        => $post_id,
+                'post_name' => $new,
+              ]);
+              add_action('save_post', ['DT_CPT','save_metabox']);
+            }
           }
         }
       }

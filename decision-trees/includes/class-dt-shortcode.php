@@ -32,6 +32,7 @@ class DT_Shortcode {
     $payload = [
       'containerId' => $container_id,
       'config' => $config,
+      'options' => DT_Settings::get_options(),
     ];
     $inline = 'window.DTREE_INSTANCES = window.DTREE_INSTANCES || [];'
             . 'window.DTREE_INSTANCES.push('.wp_json_encode($payload).');';

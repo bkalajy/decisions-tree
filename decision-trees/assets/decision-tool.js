@@ -51,12 +51,13 @@
       var fields = Array.isArray(cfg.fields) ? cfg.fields : [];
       var rules  = Array.isArray(cfg.rules)  ? cfg.rules  : [];
   
-      // Container
-      var h2 = document.createElement('h2');
-      h2.className = 'dtree-title';
-      h2.textContent = cfg.title || 'Decision Tool';
-      root.appendChild(h2);
-  
+      // Container title (can be globally hidden)
+      if (!(instance.options && instance.options.hide_title)) {
+        var h2 = document.createElement('h2');
+        h2.className = 'dtree-title';
+        h2.textContent = (cfg.title || 'Decision Tool');
+        root.appendChild(h2);
+      }  
       var form = document.createElement('form');
       form.className = 'dtree-form';
       form.setAttribute('novalidate','novalidate');
@@ -136,13 +137,35 @@
         resultBox.style.display = 'block';
         text.textContent = message || '';
   
-        badge.textContent = (cfg.statusLabels && cfg.statusLabels[statusKey]) ||
-                            (statusKey==='ok'?'Recommended':statusKey==='no'?'Not recommended':'Recommended with restriction');
-  
-        badge.classList.remove('dtree-ok','dtree-no','dtree-restrict');
-        if (statusKey === 'ok') badge.classList.add('dtree-ok');
-        else if (statusKey === 'no') badge.classList.add('dtree-no');
-        else badge.classList.add('dtree-restrict');
+        // Use global statuses from options (object keyed by status key)
+        var statusMap = (instance.options && instance.options.statuses) ? instance.options.statuses : {};
+
+        var meta = statusMap[statusKey] || null;
+        var fallbackLabel =
+          (cfg.statusLabels && cfg.statusLabels[statusKey]) ||
+          (statusKey === 'ok' ? 'Recommended' :
+            statusKey === 'no' ? 'Not recommended' :
+              'Recommended with restriction');
+
+        // after computing `meta` and `fallbackLabel`:
+        badge.textContent = meta && meta.label ? meta.label : fallbackLabel;
+
+        // reset styles
+        badge.className = 'dtree-badge';
+        badge.style.color = '';
+        badge.style.backgroundColor = '';
+        badge.style.borderColor = '';
+
+        if (meta) {
+          if (meta.text) badge.style.color = String(meta.text);
+          if (meta.bg) badge.style.backgroundColor = String(meta.bg);
+          if (meta.border) badge.style.borderColor = String(meta.border);
+        } else {
+          // legacy fallback only
+          if (statusKey === 'ok') badge.classList.add('dtree-ok');
+          else if (statusKey === 'no') badge.classList.add('dtree-no');
+          else if (statusKey === 'restrict') badge.classList.add('dtree-restrict');
+        }
       }
   
       btn.addEventListener('click', function(){
@@ -155,9 +178,8 @@
         }
         var values = collectValues();
         var match = firstMatch(rules, values);
-        if (!match) { show('no','Criteria not met.'); return; }
-        var status = (match.status==='ok' || match.status==='restrict') ? match.status : 'no';
-        show(status, String(match.message || ''));
+        if (!match || !match.status) { show('no', 'Criteria not met.'); return; }
+        show(String(match.status), String(match.message || ''));
       });
     }
   
